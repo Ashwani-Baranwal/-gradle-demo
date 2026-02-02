@@ -1,24 +1,56 @@
 pipeline {
     agent any
 
+    environment {
+        // Jenkins Credential ID for SonarQube token
+        SONAR_TOKEN = credentials('sqa_71b96273a9891998dd0216ad7fd063161641baad')
+    }
+
     stages {
 
         stage('Checkout') {
             steps {
+                echo 'Checking out code...'
                 checkout scm
             }
         }
 
         stage('Build & Test') {
             steps {
-                bat 'gradle clean build'
+                echo 'Building and testing the project with Gradle...'
+                // This will run tests and generate jacoco.exec
+                bat 'gradle clean test jacocoTestReport'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                echo 'Running SonarQube scan...'
+                bat """
+                gradlew sonarqube ^
+                -Dsonar.projectKey=gradle-demo ^
+                -Dsonar.projectName=gradle-demo ^
+                -Dsonar.host.url=http://localhost:9000 ^
+                -Dsonar.login=%SONAR_TOKEN% ^
+                -Dsonar.java.binaries=build/classes/java/main ^
+                -Dsonar.java.test.binaries=build/classes/java/test ^
+                -Dsonar.junit.reportPaths=build/test-results/test ^
+                -Dsonar.jacoco.reportPaths=build/jacoco/test.exec
+                """
             }
         }
 
         stage('Archive Artifact') {
             steps {
+                echo 'Archiving build artifacts...'
                 archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished.'
         }
     }
 }
