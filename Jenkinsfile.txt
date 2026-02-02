@@ -19,7 +19,7 @@ pipeline {
             steps {
                 echo 'Building and testing the project with Gradle...'
                 // This will run tests and generate jacoco.exec
-                bat 'gradle clean test jacocoTestReport'
+                bat 'gradlew clean test jacocoTestReport'
             }
         }
 
