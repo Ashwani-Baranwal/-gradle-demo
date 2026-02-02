@@ -16,12 +16,12 @@ pipeline {
         }
 
         stage('Build & Test') {
-            steps {
-                echo 'Building and testing the project with Gradle...'
-                // This will run tests and generate jacoco.exec
-                bat 'gradlew clean test jacocoTestReport'
-            }
-        }
+    		steps {
+        		echo 'Building and testing the project with Gradle...'
+        		bat 'gradlew.bat clean test jacocoTestReport'
+    		}
+	}
+
 
         stage('SonarQube Analysis') {
             steps {
